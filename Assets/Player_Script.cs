@@ -9,18 +9,31 @@ public class Player_Script : MonoBehaviour
     public float Player_JumpForce = 10f;
     private bool Player_jump = false;
     public bool grounded = false;
+    private Animator Player_Animation;
     
     // Start is called before the first frame update
     void Start()
     {
+        Player_Animation = GetComponent<Animator>();
         rb2d = GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.W) && grounded)
-        { Player_jump = true; }
+        Player_Animation.SetFloat("Speed", Mathf.Abs(rb2d.velocity.x)); //Valor absoluto = siempre positivo.
+        Player_Animation.SetBool("Ground",grounded);
+       
+
+
+        if (Input.GetKeyDown(KeyCode.UpArrow) && grounded)
+        { Player_jump = true;
+          Player_Animation.SetTrigger("Jump");
+        }
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            Player_Animation.SetTrigger("Shoot");
+        }
 
     }
 

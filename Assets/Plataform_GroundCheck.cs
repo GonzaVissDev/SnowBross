@@ -15,7 +15,6 @@ public class Plataform_GroundCheck : MonoBehaviour
     {
         if (collision.gameObject.tag == "Ground")
         {
-            Debug.Log("Hola");
             player.grounded = true;
         }
     }
