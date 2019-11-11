@@ -33,5 +33,19 @@ public class Bullet : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         //Cuando toque con el enemigo.
+        if (collision.gameObject.tag == "Ground")
+        {
+            
+            Destroy(this.gameObject);
+        }
+        if (collision.gameObject.tag == "Enemy")
+        {
+            Debug.Log("Toque un enemigo");
+            if (collision.gameObject.GetComponent<Enemy_Script>() != null)
+            {
+                Enemy_Script Hit = collision.gameObject.GetComponent<Enemy_Script>();
+                Hit.SendMessage("Bullet_Hit", 1);
+            }
+        }
     }
 }

@@ -11,6 +11,7 @@ public class Player_Script : MonoBehaviour
     public float Player_Direction = 1f;
     public float Player_JumpForce = 10f;
     private bool Player_jump = false;
+    public bool Player_MoveSnowBall = false;
     public bool grounded = false;
     public float Bullet_Cooldown = 0.5f;
     public float Cooldown_Timer;
@@ -28,7 +29,8 @@ public class Player_Script : MonoBehaviour
     {
         Player_Animation.SetFloat("Speed", Mathf.Abs(rb2d.velocity.x)); //Valor absoluto = siempre positivo.
         Player_Animation.SetBool("Ground",grounded);
-       
+        Player_Animation.SetBool("MoveObj", Player_MoveSnowBall);
+
 
 
         if (Input.GetKeyDown(KeyCode.UpArrow) && grounded)
@@ -97,6 +99,35 @@ public class Player_Script : MonoBehaviour
        
             GameObject CloneBullet = Instantiate( Bullet,Bullet_position.transform.position, Quaternion.identity) as GameObject;
          
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Enemy")
+        {
+            if (collision.gameObject.GetComponent<Enemy_Script>() != null)
+            {
+                Enemy_Script EnemyCollision = collision.gameObject.GetComponent<Enemy_Script>();
+                if (EnemyCollision.E_State == Enemy_Script.EnemyState.SnowBall)
+                {
+                    Player_MoveSnowBall = true;
+                }
+            }
+        }
+    }
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Enemy")
+        {
+            if (collision.gameObject.GetComponent<Enemy_Script>() != null)
+            {
+                Enemy_Script EnemyCollision = collision.gameObject.GetComponent<Enemy_Script>();
+                if (EnemyCollision.E_State == Enemy_Script.EnemyState.SnowBall)
+                {
+                    Player_MoveSnowBall = false;
+                }
+            }
         }
     }
 }

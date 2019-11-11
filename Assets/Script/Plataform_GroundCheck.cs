@@ -17,6 +17,16 @@ public class Plataform_GroundCheck : MonoBehaviour
         {
             player.grounded = true;
         }
+       /* if (collision.gameObject.tag == "Enemy")
+        {
+            if (collision.gameObject.GetComponent<Enemy_Script>() != null)
+            {
+                Enemy_Script EnemyCollision = collision.gameObject.GetComponent<Enemy_Script>();
+               if (EnemyCollision.E_State == Enemy_Script.EnemyState.SnowBall)
+                {
+                }
+            }
+        }*/
     }
     private void OnCollisionExit2D(Collision2D collision)
     {
