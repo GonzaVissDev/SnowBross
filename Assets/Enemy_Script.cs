@@ -8,6 +8,10 @@ public class Enemy_Script : MonoBehaviour
     public float Enemy_Speed = 5f;
     public int Enemy_Hit = 0;
     private int Enemy_MaxHit = 4;
+    public bool Addforce = true;
+    public bool MoveBall = false;
+    public float Ball_Direction;
+    private float Snowball_Side;
     public enum EnemyState { Idle, Freeze, SnowBall, Death };
     public EnemyState E_State = EnemyState.Idle;
     private Animator A_Enemy;
@@ -29,20 +33,20 @@ public class Enemy_Script : MonoBehaviour
 
         if (E_State == EnemyState.Freeze)
         {
-            rbEnemy.velocity = Vector2.zero;
             //si esta congelado StartCoroutine(Recovering());
         }
 
+
+
         if (E_State == EnemyState.SnowBall)
         {
-            Invoke("RecoveringON",2f);
+            Invoke("RecoveringON",5f);
+            if (MoveBall == true)
+            {
+                rbEnemy.transform.position += ((Vector3.right*Snowball_Side * Ball_Direction * Time.deltaTime));
+            }
         }
     }
-
-
-
-
-
 
     public void Bullet_Hit (int Hit)
     {
@@ -59,13 +63,20 @@ public class Enemy_Script : MonoBehaviour
 
      void RecoveringON(){
        
-        if (Time.time > NextRecovering)
+       if (Time.time > NextRecovering)
         { 
-           if(Enemy_Hit > 0)
+           if(Enemy_Hit > 0 && Addforce ==false)
             {
                 NextRecovering = Time.time + Recovering; 
                 Enemy_Hit--;
             }
         }
      }
+
+    public void Impulse (float side)
+    {
+        float Side_Position = Mathf.Sign(transform.position.x - side);
+        Snowball_Side = Side_Position;
+        MoveBall = true;
+    }
 }

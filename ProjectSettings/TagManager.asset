@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Ground
   - Enemy
+  - Wall
+  - Wall_End
   layers:
   - Default
   - TransparentFX
@@ -15,9 +17,9 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
+  - Player
+  - Ground
+  - SnowBall
   - 
   - 
   - 
