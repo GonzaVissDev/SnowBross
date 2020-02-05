@@ -8,6 +8,8 @@ TagManager:
   - Enemy
   - Wall
   - Wall_End
+  - Snow
+  - RespawnObject
   layers:
   - Default
   - TransparentFX

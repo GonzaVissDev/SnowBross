@@ -5,6 +5,7 @@ using UnityEngine;
 public class Plataform_GroundCheck : MonoBehaviour
 {
     private Player_Script player;
+   
     // Start is called before the first frame update
     void Start()
     {

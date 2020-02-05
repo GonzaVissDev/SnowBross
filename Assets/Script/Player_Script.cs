@@ -7,37 +7,56 @@ public class Player_Script : MonoBehaviour
     private Rigidbody2D rb2d;
     public GameObject Bullet;
     public Transform Bullet_position;
+    public enum PlayerState { Idle, Walk,Jump, SurfSnow, Death };
+    public PlayerState Player_State = PlayerState.Idle;
+
+
     public float Player_Speed = 10f;
+    public float Player_MaxSpeed = 5f;
     public float Player_Direction = 1f;
     public float Player_JumpForce = 10f;
-    private bool Player_jump = false;
+    public int Player_Life = 2;
+    public bool Player_Die = false;
     public bool Player_Surf = false;
     public bool Player_MoveSnowBall = false;
     public bool grounded = false;
+    public bool Stop = false;
     public float Bullet_Cooldown = 0.5f;
     public float Cooldown_Timer;
     private Animator Player_Animation;
-    
+    Vector3 Snowball_Position;
+    Vector3 Player_Snowball;
+    public Respawn_Player Respawn_Script;
+
     // Start is called before the first frame update
     void Start()
     {
         Player_Animation = GetComponent<Animator>();
         rb2d = GetComponent<Rigidbody2D>();
+        Respawn_Script = GetComponent<Respawn_Player>();
+
+        GameObject RespawnObject = GameObject.FindWithTag("RespawnObject");
+
+        if (RespawnObject != null)
+        {
+            Respawn_Script = RespawnObject.GetComponent<Respawn_Player>();
+
+        }
+
     }
 
-    // Update is called once per frame
-    void Update()
+        // Update is called once per frame
+        void Update()
     {
-        Player_Animation.SetFloat("Speed", Mathf.Abs(rb2d.velocity.x)); //Valor absoluto = siempre positivo.
+        Player_Animation.SetFloat("Speed", Mathf.Abs(rb2d.velocity.x));
         Player_Animation.SetBool("Ground",grounded);
         Player_Animation.SetBool("MoveObj", Player_MoveSnowBall);
         Player_Animation.SetBool("Surf",Player_Surf);
-
-
+        Player_Animation.SetBool("Die", Player_Die);
 
         if (Input.GetKeyDown(KeyCode.UpArrow) && grounded)
-        { Player_jump = true;
-          Player_Animation.SetTrigger("Jump");
+        {
+            Player_State = PlayerState.Jump;
         }
         if (Input.GetKeyDown(KeyCode.X))
         {
@@ -53,7 +72,7 @@ public class Player_Script : MonoBehaviour
         {
             Cooldown_Timer =0;
         }
-        if (Input.GetButton("Fire1")&& Cooldown_Timer ==0)
+        if (Input.GetKeyDown(KeyCode.X) && Cooldown_Timer ==0)
         {
             Player_Animation.SetTrigger("Shoot");
             Spawn_Bullet(true);
@@ -64,13 +83,15 @@ public class Player_Script : MonoBehaviour
 
     private void FixedUpdate()
     {
-        /*Vector3 fixedvelocity = rb2d.velocity;
-        fixedvelocity.x *= 0.75f;
-        if (grounded)
-        { rb2d.velocity = fixedvelocity; }
-        */
         float PlayerSpeed_x = Input.GetAxis("Horizontal");
+        if (Stop== true){ PlayerSpeed_x = 0; }
+
         rb2d.AddForce(Vector2.right * Player_Speed * PlayerSpeed_x);
+
+        float limitedSpeed = Mathf.Clamp(rb2d.velocity.x, -Player_MaxSpeed, Player_MaxSpeed);
+
+        rb2d.velocity = new Vector2(limitedSpeed, rb2d.velocity.y);
+       
 
         if (PlayerSpeed_x> 0.1f)
         {
@@ -86,13 +107,33 @@ public class Player_Script : MonoBehaviour
 
 
         //Movimientos 
-        if (Player_jump == true)
+        if (Player_State == PlayerState.Jump)
         {
+            Player_Animation.SetTrigger("Jump");
             rb2d.AddForce(Vector2.up * Player_JumpForce, ForceMode2D.Impulse);
-            //forcemode2d.impulse es para no manejar numeros grandes.
-            Player_jump = false;
+            Player_State = PlayerState.Idle;
+            Stop = false;
         }
-        
+
+        if (Player_State == PlayerState.SurfSnow)
+        {
+            Stop = true;
+            rb2d.GetComponent<Rigidbody2D>().simulated = false;
+            
+        }
+
+        if (Player_State == PlayerState.Death)
+        {
+            Player_Die = true;
+            rb2d.bodyType = RigidbodyType2D.Kinematic;
+            rb2d.MovePosition(transform.position + transform.up * Time.fixedDeltaTime);
+            Respawn_Script.SendMessage("Respawn");
+            Destroy(this.gameObject, 1f);
+
+        }
+
+
+
     }
 
     void Spawn_Bullet (bool is_Shooting)
@@ -104,6 +145,13 @@ public class Player_Script : MonoBehaviour
         }
     }
 
+    public void Surf_Snowball(bool Surfing)
+    {
+        Player_State = PlayerState.SurfSnow;
+        Player_Surf = Surfing;
+       
+    }
+
     private void OnCollisionStay2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Enemy")
@@ -112,8 +160,10 @@ public class Player_Script : MonoBehaviour
             {
                 Enemy_Script EnemyCollision = collision.gameObject.GetComponent<Enemy_Script>();
                 if (EnemyCollision.E_State == Enemy_Script.EnemyState.SnowBall)
-                {   Player_MoveSnowBall = true;
-                    if (Input.GetKeyDown(KeyCode.X))
+                {
+                    Player_MoveSnowBall = true;
+
+                    if (Input.GetKeyDown(KeyCode.C))
                     {
                         EnemyCollision.SendMessage("Impulse",transform.position.x);
                     }
@@ -122,7 +172,8 @@ public class Player_Script : MonoBehaviour
             }
         }
     }
-    private void OnCollisionExit2D(Collision2D collision)
+    
+private void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Enemy")
         {

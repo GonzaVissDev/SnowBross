@@ -20,7 +20,7 @@ public class Bullet : MonoBehaviour
         }
 
 
-       rb.AddForce(new Vector2(6f* player.Player_Direction, 4f), ForceMode2D.Impulse);
+       rb.AddForce(new Vector2(6f* player.Player_Direction, 2f), ForceMode2D.Impulse);
         if (player.Player_Direction == -1f)
         {
             rb.transform.Rotate(0f, -180f, 0);
@@ -40,11 +40,11 @@ public class Bullet : MonoBehaviour
         }
         if (collision.gameObject.tag == "Enemy")
         {
-            Debug.Log("Toque un enemigo");
             if (collision.gameObject.GetComponent<Enemy_Script>() != null)
             {
                 Enemy_Script Hit = collision.gameObject.GetComponent<Enemy_Script>();
                 Hit.SendMessage("Bullet_Hit", 1);
+                Destroy(this.gameObject);
             }
         }
     }
